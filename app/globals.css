@@ -1,56 +1,36 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-:root {
-  --background: #050b14;
-  --foreground: #f8fafc;
-  --arctic-surface: #071426;
-  --arctic-cyan: #38bdf8;
-  --arctic-mint: #34d399;
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.font-serif {
+  font-family: 'Instrument Serif', Georgia, serif;
 }
 
-html {
-  scroll-behavior: smooth;
-  color-scheme: dark;
+.font-sans {
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-body {
-  background-color: var(--background);
-  background-image: 
-    radial-gradient(at 15% 10%, rgba(56, 189, 248, 0.08) 0px, transparent 45%),
-    radial-gradient(at 85% 15%, rgba(52, 211, 153, 0.07) 0px, transparent 45%),
-    radial-gradient(at 50% 90%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
-  background-attachment: fixed;
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+/* Uiverse Animated Blob Bounce */
+@keyframes blob-bounce {
+  0% {
+    transform: translate(-100%, -100%) translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate(-100%, -100%) translate3d(100%, 0, 0);
+  }
+  50% {
+    transform: translate(-100%, -100%) translate3d(100%, 100%, 0);
+  }
+  75% {
+    transform: translate(-100%, -100%) translate3d(0, 100%, 0);
+  }
+  100% {
+    transform: translate(-100%, -100%) translate3d(0, 0, 0);
+  }
 }
 
-/* Arctic Glass Text Selection */
-::selection {
-  background-color: rgba(56, 189, 248, 0.28);
-  color: #ffffff;
-}
-
-/* Refined Dark Glass Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #040911;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #132844;
-  border-radius: 9999px;
-  border: 2px solid #040911;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #1e3d66;
+.animate-blob {
+  animation: blob-bounce 5.5s infinite ease;
 }
