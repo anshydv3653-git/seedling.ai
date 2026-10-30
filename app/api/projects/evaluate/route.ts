@@ -1,136 +1,91 @@
-import { NextRequest, NextResponse } from 'next/server';
+// app/api/evaluate/route.ts
+import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { supabaseServer } from '@/lib/supabaseServer';
+import { fetchGitHubRepoDetails } from '@/lib/github';
 
-// Build time static analysis bypass karne ke liye zaroori configs
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
-interface EvaluationResult {
-  ai_score: number;
-  ai_feedback: string;
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const {
-      title,
-      tagline,
-      description,
-      builder_name,
-      target_funding,
-      demo_url,
-      github_url,
-      student_tier,
-    } = body;
+    const { title, description, problemStatement, fundingTarget, githubUrl, demoUrl } = body;
 
-    // Required field validation
-    if (!title || !description || !builder_name || !target_funding) {
-      return NextResponse.json(
-        { error: 'Missing required project details.' },
-        { status: 400 }
-      );
+    // 1. Live GitHub Audit Fetch
+    let gitHubDiligence = null;
+    if (githubUrl) {
+      gitHubDiligence = await fetchGitHubRepoDetails(githubUrl);
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'Gemini API key is not configured.' },
-        { status: 500 }
-      );
-    }
+    // 2. Comprehensive Gemini 2.5 Prompt
+    const systemPrompt = `
+You are the Lead Investment & Technical Diligence Partner for SparkVenture (SVC).
+Your job is to rigorously evaluate student engineering projects for micro-grant funding ($25 to $500).
 
-    // Google Gemini 2.5 Flash setup
-    const ai = new GoogleGenAI({ apiKey });
+You must inspect:
+1. Technical depth and clarity of the pitch.
+2. Real-world GitHub repository authenticity (is it a real codebase or an empty/template repo?).
+3. Realistic budget justification ($50-$200 for hosting/APIs vs inflated amounts).
 
-    const evaluationPrompt = `
-You are an expert tech investor and hackathon judge evaluating a student prototype.
-Analyze the following student project:
-
-Title: ${title}
-Tagline: ${tagline || 'N/A'}
-Description: ${description}
-Builder: ${builder_name}
-Target Funding: $${target_funding}
-Student Tier: ${student_tier || 'Beginner'}
-GitHub: ${github_url || 'N/A'}
-Demo: ${demo_url || 'N/A'}
-
-Evaluate the project based on Innovation, Technical Feasibility, Execution Clarity, and Micro-Grant Impact.
-You MUST reply ONLY with a valid JSON object matching this exact format:
+Return your evaluation STRICTLY as valid JSON with this exact schema:
 {
-  "ai_score": <number between 50 and 98>,
-  "ai_feedback": "<concise, constructive evaluation paragraph highlighting key strengths and immediate improvements>"
+  "ai_score": number (0 to 100),
+  "verdict": "FUNDABLE" | "HIGH_POTENTIAL" | "NEEDS_REVISION" | "FLAGGED_SUSPICIOUS",
+  "summary": "2-3 concise sentences explaining the decision",
+  "code_diligence_summary": "1-2 sentences analyzing their GitHub repo health",
+  "strengths": ["string", "string", "string"],
+  "risk_factors": ["string", "string"],
+  "suggested_grant_usd": number
 }
-Do not include markdown code fences or extra text.
 `;
 
-    let evaluation: EvaluationResult = {
-      ai_score: 75,
-      ai_feedback: 'Student prototype shows promise and meets baseline execution criteria.',
-    };
+    const userPrompt = `
+PROJECT SUBMISSION:
+- Title: ${title}
+- Description: ${description}
+- Problem Solved: ${problemStatement}
+- Funding Target Requested: $${fundingTarget}
+- Live Demo: ${demoUrl || 'Not provided'}
+- GitHub Repo URL: ${githubUrl || 'Not provided'}
 
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: evaluationPrompt,
-      });
+GITHUB REPOSITORY VERIFICATION DATA:
+${
+  gitHubDiligence?.exists
+    ? `
+- Primary Language: ${gitHubDiligence.primaryLanguage}
+- Stars: ${gitHubDiligence.stars} | Forks: ${gitHubDiligence.forks} | Open Issues: ${gitHubDiligence.openIssues}
+- README Content (First 2000 chars):
+"""
+${gitHubDiligence.readmeSnippet}
+"""`
+    : `- Verification Status: Repository unreachable or invalid (${gitHubDiligence?.error || 'No link provided'}).`
+}
+`;
 
-      const responseText = response.text?.trim() || '';
-      const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(cleanJson);
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        { role: 'user', parts: [{ text: systemPrompt + '\n\n' + userPrompt }] },
+      ],
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.2, // Consistent, objective scoring
+      },
+    });
 
-      if (parsed.ai_score && typeof parsed.ai_score === 'number') {
-        evaluation.ai_score = Math.min(Math.max(parsed.ai_score, 50), 99);
-      }
-      if (parsed.ai_feedback && typeof parsed.ai_feedback === 'string') {
-        evaluation.ai_feedback = parsed.ai_feedback;
-      }
-    } catch (aiError) {
-      console.warn('Gemini evaluation fallback applied:', aiError);
-      // Fallback default calculation if API rate limit or JSON parse hits
-      evaluation = {
-        ai_score: Math.floor(Math.random() * 15) + 75,
-        ai_feedback: 'Project verified. Demonstrates strong potential for early-stage prototype micro-funding.',
-      };
-    }
+    const auditResult = JSON.parse(response.text || '{}');
 
-    // Insert project into Supabase database
-    const { data: insertedProject, error: dbError } = await supabaseServer
-      .from('projects')
-      .insert([
-        {
-          title,
-          tagline: tagline || '',
-          description,
-          builder_name,
-          target_funding: Number(target_funding),
-          demo_url: demo_url || null,
-          github_url: github_url || null,
-          student_tier: student_tier || 'Class 10 / High School',
-          ai_score: evaluation.ai_score,
-          ai_feedback: evaluation.ai_feedback,
-          created_at: new Date().toISOString(),
-        },
-      ])
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error('Supabase insertion error:', dbError);
-      return NextResponse.json(
-        { error: dbError.message || 'Database insertion failed.' },
-        { status: 500 }
-      );
-    }
-
+    return NextResponse.json({
+      success: true,
+      audit: auditResult,
+      gitHubVerified: gitHubDiligence?.exists || false,
+    });
+  } catch (error: any) {
+    console.error('Audit Error:', error);
     return NextResponse.json(
-      { success: true, project: insertedProject },
-      { status: 201 }
+      { error: 'Evaluation failed', details: error.message },
+      { status: 500 }
     );
-  } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

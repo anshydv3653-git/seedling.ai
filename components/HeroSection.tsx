@@ -12,7 +12,7 @@ import {
   TrendingUp,
   Layers,
 } from 'lucide-react';
-import { ProjectWithFunding } from '@/types/SparkVenture';
+import { ProjectWithFunding } from '@/types/seedling';
 
 interface HeroSectionProps {
   projects: ProjectWithFunding[];
@@ -125,7 +125,7 @@ export function HeroSection({
           </motion.div>
         </div>
 
-        {/* Live Telemetry Bar (Strictly Computed from Real Data) */}
+        {/* Live Telemetry Bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -179,7 +179,7 @@ export function HeroSection({
           </div>
         </motion.div>
 
-        {/* How It Works / AI Venture Protocol Strip */}
+        {/* How It Works Strip */}
         <div
           id="how-it-works"
           className="mt-12 rounded-3xl border border-white/10 bg-[#061120]/70 backdrop-blur-xl p-6 sm:p-8"
