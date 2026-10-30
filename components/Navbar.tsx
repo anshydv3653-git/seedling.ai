@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sprout, Sparkles, Compass, ShieldCheck } from 'lucide-react';
+import { Sparkles, Compass, ShieldCheck } from 'lucide-react';
 
 interface NavbarProps {
   projectCount: number;
@@ -19,13 +19,18 @@ export function Navbar({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-cyan-400/15 bg-[#050B14]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#050B14]/65">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand Identity */}
+        {/* Brand Identity with SVC Badge */}
         <a
           href="#top"
-          className="group flex items-center gap-3 focus:outline-none"
+          className="group flex items-center gap-3.5 focus:outline-none"
         >
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/30 bg-gradient-to-br from-cyan-500/20 via-sky-500/10 to-emerald-500/20 shadow-lg shadow-cyan-950/50 group-hover:border-cyan-300/50 transition-all">
-            <Sprout className="h-5 w-5 text-emerald-300 transition-transform duration-300 group-hover:scale-110" />
+          {/* SVC Glass Badge Logo */}
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/35 bg-gradient-to-br from-cyan-500/20 via-sky-500/15 to-emerald-500/20 shadow-lg shadow-cyan-950/60 backdrop-blur-md group-hover:border-cyan-300/60 group-hover:shadow-cyan-500/25 transition-all duration-300">
+            <span className="font-black text-sm tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-teal-200 to-white transition-transform duration-300 group-hover:scale-105">
+              SVC
+            </span>
+
+            {/* Live Status Pulse */}
             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" />
@@ -35,7 +40,7 @@ export function Navbar({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold tracking-tight text-white">
-                Seedling<span className="text-cyan-400">AI</span>
+                Spark<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-300">Venture</span>
               </span>
               <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
                 Gemini 2.5

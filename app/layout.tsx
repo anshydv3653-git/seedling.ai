@@ -1,7 +1,9 @@
 // app/layout.tsx
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+export const metadata: Metadata = {
+  title: "SparkVenture | Student Micro-Grants & AI Venture Audit",
+  description:
+    "Student micro-grants backed by AI venture analysis and PayPal sandbox.",
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Seedling AI | Student Micro-Grants & AI Venture Audit",
+  title: "SparkVenture AI | Student Micro-Grants & AI Venture Audit",
   description:
     "AI-evaluated student micro-grants powered by Google Gemini 2.5 Flash and secure PayPal sandbox backing.",
 };

@@ -12,7 +12,7 @@ import {
   TrendingUp,
   Layers,
 } from 'lucide-react';
-import { ProjectWithFunding } from '@/types/seedling';
+import { ProjectWithFunding } from '@/types/SparkVenture';
 
 interface HeroSectionProps {
   projects: ProjectWithFunding[];
@@ -73,7 +73,7 @@ export function HeroSection({
             </span>
           </motion.div>
 
-          {/* Required Hero Headline */}
+          {/* SparkVenture Hero Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -82,7 +82,7 @@ export function HeroSection({
           >
             Big Ideas Deserve{' '}
             <span className="bg-gradient-to-r from-cyan-300 via-sky-200 to-emerald-300 bg-clip-text text-transparent">
-              A Little Support
+              A Little Spark
             </span>
           </motion.h1>
 
@@ -93,9 +93,9 @@ export function HeroSection({
             transition={{ duration: 0.4, delay: 0.1 }}
             className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto"
           >
-            Seedling AI pairs student builders with transparent AI venture
-            analysis and direct community micro-grants. Submit your prototype,
-            get an instant viability breakdown, and fund the next breakthrough.
+            SparkVenture pairs student builders with transparent Gemini 2.5
+            venture audits and direct community micro-grants. Submit your prototype,
+            get an instant viability score, and fund the next breakthrough.
           </motion.p>
 
           {/* Primary & Secondary CTAs */}
