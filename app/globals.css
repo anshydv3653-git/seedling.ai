@@ -1,15 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.font-serif {
-  font-family: 'Instrument Serif', Georgia, serif;
-}
-
-.font-sans {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+@layer utilities {
+  .font-serif {
+    font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+  }
 }
 
 /* Uiverse Animated Blob Bounce */

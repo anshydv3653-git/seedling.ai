@@ -1,139 +1,154 @@
-// app/api/projects/evaluate/route.ts
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { fetchGitHubRepoDetails } from '@/lib/github';
-import { supabaseServer } from '@/lib/supabaseServer';
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || '',
 });
 
+// Spam & Gibberish Filter (e.g. dasssassssssssss, aaaaaa, random keys)
+function isGibberishText(text: string): boolean {
+  if (!text || text.trim().length < 3) return true;
+  // 4 ya usse zyada consecutive repeated characters
+  if (/(.)\1{3,}/i.test(text)) return true;
+  // Bina vowels ke lambe words (minimum 7 letters)
+  const words = text.trim().split(/\s+/);
+  for (const word of words) {
+    if (word.length >= 7 && !/[aeiouy]/i.test(word)) return true;
+  }
+  return false;
+}
+
+// Live GitHub Repository Verification via Public API
+async function verifyPublicGitHubRepo(url: string) {
+  try {
+    const match = url.match(/github\.com\/([^\/\s]+)\/([^\/\s#?]+)/);
+    if (!match) {
+      return { valid: false, message: 'Invalid GitHub URL structure. Format: https://github.com/owner/repo' };
+    }
+
+    const owner = match[1];
+    const repo = match[2].replace(/\.git$/, '');
+
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: {
+        'User-Agent': 'SparkVenture-Diligence-Engine',
+        Accept: 'application/vnd.github.v3+json',
+      },
+      cache: 'no-store',
+    });
+
+    if (res.status === 404) {
+      return { valid: false, message: 'GitHub repository not found (404). Public repository link provide karein.' };
+    }
+
+    if (!res.ok) {
+      return { valid: false, message: `GitHub API response error (${res.status}).` };
+    }
+
+    const data = await res.json();
+    return {
+      valid: true,
+      stars: data.stargazers_count,
+      language: data.language || 'Software',
+      forks: data.forks_count,
+      description: data.description || '',
+    };
+  } catch {
+    return { valid: false, message: 'Unable to connect to GitHub. Verify internet access.' };
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const title = (body.title || '').trim();
+    const tagline = (body.tagline || '').trim();
+    const description = (body.description || '').trim();
+    const githubUrl = (body.githubUrl || body.github_url || '').trim();
+    const fundingTarget = Number(body.fundingTarget || body.target_amount || 0);
 
-    // Frontend se aane wale har variant ko gracefully handle karna
-    const title = body.title || 'Untitled Project';
-    const description = body.description || body.tagline || 'No description';
-    const problemStatement = body.problemStatement || body.tagline || body.description || 'General Innovation';
-    const fundingTarget = Number(body.fundingTarget || body.target_amount || 100);
-    const githubUrl = body.githubUrl || body.github_url || '';
-    const demoUrl = body.demoUrl || body.demo_url || '';
-    const builderName = body.builder_name || body.builderName || 'Student Founder';
-    const builderEmail = body.builder_email || body.builderEmail || '';
-
-    // 1. GitHub verification
-    let gitHubDiligence = null;
-    if (githubUrl && githubUrl.includes('github.com')) {
-      gitHubDiligence = await fetchGitHubRepoDetails(githubUrl);
+    // 1. Mandatory Fields & Length Validation
+    if (!title || title.length < 3) {
+      return NextResponse.json({ error: 'Project Title me kam se kam 3 characters hone chahiye.' }, { status: 400 });
+    }
+    if (!tagline || tagline.length < 8) {
+      return NextResponse.json({ error: 'Tagline kam se kam 8 characters ki honi chahiye.' }, { status: 400 });
+    }
+    if (!description || description.length < 20) {
+      return NextResponse.json({ error: 'Detailed description kam se kam 20 characters ki honi chahiye.' }, { status: 400 });
+    }
+    if (!fundingTarget || fundingTarget < 25 || fundingTarget > 1000) {
+      return NextResponse.json({ error: 'Target micro-grant $25 se $1,000 ke beech hona chahiye.' }, { status: 400 });
     }
 
-    // 2. Gemini 2.5 Diligence
-    let auditResult = {
-      ai_score: 85,
-      verdict: 'FUNDABLE',
-      summary: 'Project demonstrates solid student initiative and clear execution scope.',
-      code_diligence_summary: 'Clean architecture with verifiable code patterns.',
-      strengths: ['Clear student value', 'Realistic resource demands', 'Practical tech stack'],
-      risk_factors: ['Early stage adoption risk'],
-      suggested_grant_usd: fundingTarget,
-    };
+    // 2. Anti-Gibberish Check
+    if (isGibberishText(title) || isGibberishText(tagline) || isGibberishText(description)) {
+      return NextResponse.json({
+        error: 'Spam detected! Repeated characters ya fake words (jaise dasssassssssssss) allowed nahi hain.',
+      }, { status: 400 });
+    }
 
-    if (process.env.GEMINI_API_KEY) {
-      try {
-        const prompt = `
-You are the AI Due Diligence Auditor for SparkVenture (SVC).
-Evaluate this student project for a micro-grant ($25 to $500).
+    // 3. Live GitHub Public API Ping
+    const repoCheck = await verifyPublicGitHubRepo(githubUrl);
+    if (!repoCheck.valid) {
+      return NextResponse.json({ error: repoCheck.message }, { status: 400 });
+    }
 
-PROJECT DATA:
+    // 4. Strict Gemini 2.5 Diligence Audit
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: 'GEMINI_API_KEY server par configured nahi hai.' }, { status: 500 });
+    }
+
+    const auditPrompt = `
+You are the Strict Anti-Fraud & Code Diligence Auditor for SparkVenture (SVC).
+Critically audit this student project submission for micro-grant viability.
+
+SUBMISSION:
 - Title: ${title}
+- Tagline: ${tagline}
 - Description: ${description}
-- Problem Solved: ${problemStatement}
-- Funding Target Requested: $${fundingTarget}
-- GitHub: ${githubUrl || 'None'}
-- Demo: ${demoUrl || 'None'}
-${gitHubDiligence?.exists ? `- GitHub Verified: Stars: ${gitHubDiligence.stars}, Lang: ${gitHubDiligence.primaryLanguage}` : ''}
+- Grant Requested: $${fundingTarget}
+- GitHub Verified Info: Language: ${repoCheck.language}, Stars: ${repoCheck.stars}
 
-Return STRICT JSON matching this structure:
+RULES:
+1. If the project claims are vague, senseless, low-effort nonsense, or fraudulent, set "verdict": "REJECTED" and assign "ai_score" strictly between 0 and 45.
+2. If legitimate, sound engineering is demonstrated, assign "verdict": "FUNDABLE" and "ai_score" between 75 and 98.
+3. Be candid, objective, and strict.
+
+Return ONLY strict valid JSON:
 {
-  "ai_score": 85,
+  "ai_score": 88,
   "verdict": "FUNDABLE",
-  "summary": "Short explanation",
-  "code_diligence_summary": "Short repo check",
-  "strengths": ["point1", "point2"],
-  "risk_factors": ["risk1"],
-  "suggested_grant_usd": ${fundingTarget}
+  "summary": "Concise 2-sentence technical evaluation",
+  "rejection_reason": null
 }
 `;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          config: {
-            responseMimeType: 'application/json',
-            temperature: 0.2,
-          },
-        });
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: auditPrompt }] }],
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.1,
+      },
+    });
 
-        if (response.text) {
-          auditResult = JSON.parse(response.text);
-        }
-      } catch (geminiErr: any) {
-        console.error('Gemini API call warning (using fallback score):', geminiErr.message);
-      }
+    const audit = JSON.parse(response.text || '{}');
+
+    if (audit.verdict === 'REJECTED' || (audit.ai_score && audit.ai_score < 60)) {
+      return NextResponse.json({
+        error: `Submission Rejected by Gemini Diligence: ${audit.rejection_reason || audit.summary || 'Low technical depth or spam content.'}`,
+        score: audit.ai_score || 0,
+      }, { status: 422 });
     }
 
-    // 3. Supabase mein project save karna (agar DB configured hai)
-    let savedProject = null;
-    try {
-      const { data, error } = await supabaseServer
-        .from('projects')
-        .insert({
-          title,
-          tagline: body.tagline || description.slice(0, 120),
-          description,
-          builder_name: builderName,
-          builder_email: builderEmail,
-          demo_url: demoUrl,
-          github_url: githubUrl,
-          target_amount: fundingTarget,
-          raised_amount: 0,
-          ai_score: auditResult.ai_score || 85,
-          evaluation: auditResult,
-          status: 'active',
-        })
-        .select()
-        .single();
-
-      if (!error && data) {
-        savedProject = data;
-      }
-    } catch (dbErr) {
-      console.warn('Database insert note:', dbErr);
-    }
-
-    // Frontend modal ke expectation ke mutabiq complete object return karna
     return NextResponse.json({
       success: true,
-      project: savedProject || {
-        id: 'temp-' + Date.now(),
-        title,
-        tagline: body.tagline || description,
-        description,
-        builder_name: builderName,
-        builder_email: builderEmail,
-        target_amount: fundingTarget,
-        raised_amount: 0,
-        ai_score: auditResult.ai_score,
-        evaluation: auditResult,
-      },
-      audit: auditResult,
+      audit,
+      repoDetails: repoCheck,
     });
-  } catch (error: any) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { error: 'Evaluation failed', details: error.message },
-      { status: 500 }
-    );
+  } catch (err: any) {
+    console.error('Strict Evaluation Route Error:', err);
+    return NextResponse.json({ error: err.message || 'Internal audit processing error' }, { status: 500 });
   }
 }
