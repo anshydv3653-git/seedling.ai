@@ -15,13 +15,13 @@
   }
 }
 
-/* Continuously Rotating Google Gemini Quad-Color Ambient Blob */
+/* Google Quad-Color Ambient Rotating Blobs */
 @keyframes geminiRotate {
   0% {
     transform: rotate(0deg) scale(1);
   }
   50% {
-    transform: rotate(180deg) scale(1.15);
+    transform: rotate(180deg) scale(1.18);
   }
   100% {
     transform: rotate(360deg) scale(1);
@@ -30,8 +30,8 @@
 
 .gemini-rotating-blob {
   position: absolute;
-  width: 280px;
-  height: 280px;
+  width: 420px;
+  height: 420px;
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
@@ -41,31 +41,46 @@
     #34A853 270deg,
     #4285F4 360deg
   );
-  filter: blur(48px);
-  opacity: 0.55;
-  animation: geminiRotate 9s linear infinite;
+  filter: blur(70px);
+  opacity: 0.45;
+  animation: geminiRotate 10s linear infinite;
   pointer-events: none;
+  z-index: 0;
 }
 
 .gemini-card-blob {
   position: absolute;
-  width: 160px;
-  height: 160px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   background: conic-gradient(
-    from 90deg,
+    from 120deg,
     #4285F4 0deg,
-    #EA4335 120deg,
-    #FBBC05 240deg,
-    #34A853 360deg
+    #EA4335 90deg,
+    #FBBC05 180deg,
+    #34A853 270deg,
+    #4285F4 360deg
   );
-  filter: blur(40px);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  animation: geminiRotate 6s linear infinite;
+  filter: blur(48px);
+  opacity: 0.22;
+  animation: geminiRotate 7s linear infinite;
   pointer-events: none;
+  transition: opacity 0.5s ease;
 }
 
 .group:hover .gemini-card-blob {
-  opacity: 0.35;
+  opacity: 0.65;
+}
+
+/* Smooth Bottom-to-Top (Neeche se Upar) Slow Motion Scroll */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(45px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
