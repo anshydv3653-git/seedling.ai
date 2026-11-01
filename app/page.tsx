@@ -66,7 +66,7 @@ const INITIAL_PROJECTS: Project[] = [
   {
     id: 'proj-1',
     title: 'seedling.ai',
-    tagline: 'AI micro-equity prototype connecting student repos with PayPal Sandbox.',
+    tagline: 'AI micro-grant prototype connecting student repos with PayPal Sandbox.',
     description: 'Venture audit prototype executing Gemini code reviews and simulated grant dispatches.',
     builder_name: 'Ansh Yadav',
     github_url: 'https://github.com/anshydv3653-git/seedling.ai',
@@ -98,54 +98,6 @@ const INITIAL_PROJECTS: Project[] = [
     raised_amount: 85,
     ai_score: 89,
     tags: ['HTML5', 'AI Prompts', 'Micro-Tool'],
-  },
-  {
-    id: 'proj-4',
-    title: 'chatbot-ui',
-    tagline: 'Open-source AI chat interface for Gemini and open-weights LLMs (Showcase).',
-    description: 'Production-ready chatbot frontend featured as an open-source architecture benchmark.',
-    builder_name: 'McKay Wrigley (Showcase)',
-    github_url: 'https://github.com/mckaywrigley/chatbot-ui',
-    target_amount: 450,
-    raised_amount: 0,
-    ai_score: 97,
-    tags: ['Next.js', 'Supabase', 'TypeScript'],
-  },
-  {
-    id: 'proj-5',
-    title: 'excalidraw',
-    tagline: 'Virtual collaborative whiteboard with hand-drawn tactile aesthetics (Showcase).',
-    description: 'Zero-latency vector drawing canvas featured as an open-source engineering reference.',
-    builder_name: 'Excalidraw Team (Showcase)',
-    github_url: 'https://github.com/excalidraw/excalidraw',
-    target_amount: 500,
-    raised_amount: 0,
-    ai_score: 98,
-    tags: ['Canvas', 'TypeScript', 'WebRTC'],
-  },
-  {
-    id: 'proj-6',
-    title: 'taxonomy',
-    tagline: 'Reference Next.js enterprise blueprint featured as an open-source benchmark.',
-    description: 'Open-source reference application demonstrating Next.js App Router and Tailwind CSS.',
-    builder_name: 'Shadcn (Showcase)',
-    github_url: 'https://github.com/shadcn/taxonomy',
-    target_amount: 400,
-    raised_amount: 0,
-    ai_score: 95,
-    tags: ['App Router', 'Tailwind', 'NextAuth'],
-  },
-  {
-    id: 'proj-7',
-    title: 'tldraw',
-    tagline: 'Tiny-footprint infinite drawing canvas featured as an open-source benchmark.',
-    description: 'High-performance interactive graphical SDK powering modern whiteboarding experiences.',
-    builder_name: 'Steve Ruiz & Team (Showcase)',
-    github_url: 'https://github.com/tldraw/tldraw',
-    target_amount: 500,
-    raised_amount: 0,
-    ai_score: 98,
-    tags: ['Graphics SDK', 'React', 'TypeScript'],
   },
 ];
 
@@ -326,34 +278,34 @@ export default function HomePage() {
 
   const astStages = [
     {
-      title: '01. Metadata & README Parsing',
-      status: 'CLEARED',
-      code: `Parsing repository metadata & README structure\nReviewing project overview and dependencies\nBasic sanity checks passed (Simulated demo).`,
+      title: '01. Repo Fetch',
+      status: 'FETCHED',
+      code: `Fetching repository metadata from GitHub API\nTarget: public repository main branch\nStatus: 200 OK (Repository accessible).`,
       desc: 'Inspects repository README, description, and dependency manifest files.',
     },
     {
-      title: '02. Architecture & Scope Review',
+      title: '02. AI Review of README & Metadata',
       status: 'VERIFIED',
-      code: `Identified Core Frameworks & Dependencies\nAI evaluation of project scope and execution\nPrimary model: Gemini Flash, Fallback: Groq LLaMA.`,
+      code: `Reading project overview, stack tags, and architecture\nReviewing scope against milestone micro-grant goals\nPrimary model: Gemini, Fallback: Groq.`,
       desc: 'AI diligence agent evaluates architecture scope and milestone plans.',
     },
     {
-      title: '03. Basic Heuristics (Planned)',
+      title: '03. Basic Spam Checks (Planned)',
       status: 'REVIEWED',
-      code: `Scanning public commit history and repo metadata\nFiltering obvious spam and empty submissions\nAdvanced Sybil resistance protocol in development.`,
+      code: `Scanning for empty repositories and duplicate submissions\nAutomated commit history heuristic in development\nHeuristic check: passed (simulated demo).`,
       desc: 'Planned checks to verify student authorship and reduce duplicate repos.',
     },
     {
-      title: '04. Sandbox Grant Clearance (Demo)',
+      title: '04. Sandbox Grant (PayPal Sandbox)',
       status: 'SIMULATED',
-      code: `Requested Grant: $50 - $500 USD (Demo)\nPayPal Sandbox Test Rail: READY FOR TEST\nDisbursement Verdict: Approved for Sandbox Demo.`,
+      code: `Grant Tier: $25 - $100 USD (Demo)\nPayPal Sandbox Orders & Capture: READY\nSimulated grant release authorized (No real money).`,
       desc: 'Automated authorization for simulated PayPal sandbox milestone release.',
     },
   ];
 
   return (
     <div className="min-h-screen bg-[#07080B] text-[#EDEDED] font-sans antialiased overflow-x-hidden selection:bg-[#D8FF36] selection:text-black">
-      {/* Top Navbar with 3D Monogram & All Multi-Buttons */}
+      {/* Top Navbar */}
       <nav className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#07080B]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
@@ -368,7 +320,7 @@ export default function HomePage() {
                 SparkVenture.
               </span>
               <span className="ml-2 rounded-full border border-[#D8FF36]/40 bg-[#D8FF36]/10 px-2 py-0.5 text-[9px] font-mono-code font-bold uppercase tracking-widest text-[#D8FF36]">
-                POWERED BY GEMINI + GROQ
+                AI Diligence Agent
               </span>
             </div>
           </div>
@@ -381,13 +333,10 @@ export default function HomePage() {
               Audited Ventures
             </a>
             <a href="#ast" className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 transition">
-              How AI Audits
+              AI Diligence Process
             </a>
             <a href="#charter" className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 transition">
               Sandbox Demo
-            </a>
-            <a href="#creator" className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 transition">
-              Builder Proof
             </a>
           </div>
 
@@ -403,17 +352,17 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section with Google 4-Color Ambient Blob */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden pt-20 pb-28 md:pt-32 md:pb-40 border-b border-white/[0.06]">
         <div className="gemini-rotating-blob top-10 left-1/4 -translate-x-1/2" />
 
         <div className="mx-auto max-w-7xl px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column: Bottom-to-Top Slow Motion Reveal */}
+            {/* Left Column */}
             <div className="lg:col-span-7 space-y-6 scroll-reveal">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md">
                 <span className="h-2 w-2 rounded-full bg-[#D8FF36] animate-pulse" />
-                <span>Autonomous Student Capital Infrastructure (Demo)</span>
+                <span>Autonomous Student Micro-Grant Infrastructure (Demo)</span>
               </div>
 
               <h1 className="font-serif-editorial text-6xl sm:text-7xl lg:text-8xl tracking-tight leading-[0.95] text-white">
@@ -422,7 +371,7 @@ export default function HomePage() {
               </h1>
 
               <p className="max-w-xl text-base sm:text-lg text-white/70 leading-relaxed font-normal">
-                Pairing student developers with AI-driven repo diligence and simulated
+                Pairing student developers with AI-driven repo review and simulated
                 PayPal Sandbox micro-grant disbursements.
               </p>
 
@@ -431,7 +380,7 @@ export default function HomePage() {
                   href="#projects"
                   className="rounded-full bg-[#D8FF36] px-8 py-4 text-xs font-black uppercase tracking-wider text-black shadow-xl hover:brightness-110 transition"
                 >
-                  Explore 7 Showcase Repos
+                  Explore Demo Repos
                 </a>
                 <a
                   href="#ast"
@@ -443,7 +392,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column: Telemetric Radar Sonar Core */}
+            {/* Right Column: Telemetric Sonar Core */}
             <div id="radar" className="lg:col-span-5 relative scroll-reveal">
               <div className="relative mx-auto w-full max-w-[400px] h-[480px] rounded-3xl overflow-hidden border border-white/15 bg-[#0D0F15]/90 backdrop-blur-2xl p-7 flex flex-col justify-between shadow-2xl">
                 <div className="gemini-rotating-blob top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -472,12 +421,12 @@ export default function HomePage() {
 
                 <div className="relative z-10 space-y-1 text-center">
                   <div className="flex justify-between items-center text-xs font-mono-code text-white/60 px-2">
-                    <span>Grants (Demo):</span>
+                    <span>Simulated Grants:</span>
                     <span className="font-bold text-[#D8FF36]">$18,450.00 (Demo)</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-mono-code text-white/60 px-2">
-                    <span>Showcase Repos:</span>
-                    <span className="font-bold text-white">7 Repositories (Demo)</span>
+                    <span>Demo Repos:</span>
+                    <span className="font-bold text-white">3 Active Projects</span>
                   </div>
                 </div>
               </div>
@@ -486,7 +435,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Interactive 4-Stage AI Inspector (How AI Audits) */}
+      {/* Interactive 4-Stage AI Inspector */}
       <section id="ast" className="py-24 border-b border-white/[0.06] bg-[#090B0F] relative">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-3xl text-center mb-16 scroll-reveal">
@@ -541,7 +490,7 @@ export default function HomePage() {
                 </pre>
 
                 <div className="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-[11px] text-white/50">
-                  <span>Engine: Gemini Flash + Groq Failover</span>
+                  <span>Engine: Gemini & Groq AI / Demo Mode (No real money)</span>
                   <span className="text-[#D8FF36]">Interactive Simulation (Demo)</span>
                 </div>
               </div>
@@ -550,7 +499,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Projects Directory (All 7 Repositories) */}
+      {/* Projects Directory (Verified Own Repositories) */}
       <section id="projects" className="py-24 border-b border-white/[0.06] bg-[#0A0C11] relative">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 scroll-reveal">
@@ -563,7 +512,7 @@ export default function HomePage() {
               </h2>
             </div>
             <p className="text-xs text-white/50 max-w-md">
-              Student and open-source codebases with AI-driven diligence and simulated PayPal Sandbox micro-equity grants.
+              Student codebases with AI-driven diligence and simulated PayPal Sandbox micro-grant disbursements.
             </p>
           </div>
 
@@ -622,34 +571,39 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-1">
-                      <button
-                        onClick={() => {
-                          setSelectedProject(project);
-                          setIsBackingModalOpen(true);
-                        }}
-                        className="flex-1 rounded-full bg-[#D8FF36] py-2.5 text-xs font-black uppercase tracking-wider text-black hover:brightness-110 transition shadow-md"
-                      >
-                        Back ${backingAmount} (Sandbox Demo)
-                      </button>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setIsBackingModalOpen(true);
+                          }}
+                          className="flex-1 rounded-full bg-[#D8FF36] py-2.5 text-xs font-black uppercase tracking-wider text-black hover:brightness-110 transition shadow-md"
+                        >
+                          Back ${backingAmount} (Sandbox Demo)
+                        </button>
 
-                      <button
-                        onClick={() => openAiAudit(project)}
-                        className="rounded-full border border-white/15 bg-white/5 p-2.5 text-white hover:bg-white/15 transition"
-                        title="Chat with AI Diligence Agent"
-                      >
-                        <Bot className="h-4 w-4" />
-                      </button>
+                        <button
+                          onClick={() => openAiAudit(project)}
+                          className="rounded-full border border-white/15 bg-white/5 p-2.5 text-white hover:bg-white/15 transition"
+                          title="Chat with AI Diligence Agent"
+                        >
+                          <Bot className="h-4 w-4" />
+                        </button>
 
-                      <a
-                        href={project.github_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-full border border-white/15 bg-white/5 p-2.5 text-white hover:bg-white/15 transition"
-                        title="View Public GitHub Repository"
-                      >
-                        <GithubIcon className="h-4 w-4" />
-                      </a>
+                        <a
+                          href={project.github_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-white/15 bg-white/5 p-2.5 text-white hover:bg-white/15 transition"
+                          title="View Public GitHub Repository"
+                        >
+                          <GithubIcon className="h-4 w-4" />
+                        </a>
+                      </div>
+                      <p className="text-[10px] text-white/40 text-center">
+                        Sandbox mode, no real money
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -682,8 +636,7 @@ export default function HomePage() {
               <span className="text-xs font-mono-code text-[#D8FF36]">01.</span>
               <h3 className="font-serif-luxury text-xl font-bold text-white">Repository Non-Retention Policy</h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                The AI diligence agent reviews the public README and repo metadata. No source code files are permanently
-                stored on our servers, and contents are not used to train AI models.
+                The AI diligence agent inspects public README and repository metadata. Source code is never cloned or stored on our servers, and contents are not used to train AI models.
               </p>
             </div>
 
@@ -691,8 +644,7 @@ export default function HomePage() {
               <span className="text-xs font-mono-code text-[#D8FF36]">02.</span>
               <h3 className="font-serif-luxury text-xl font-bold text-white">100% Student IP Sovereignty</h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                Micro-grants on SparkVenture are conceptualized as non-dilutive educational milestone funding. This
-                prototype does not claim equity warrants, patents, or IP rights on student projects.
+                Micro-grants on SparkVenture are non-dilutive educational milestone funding. No equity warrants, patents, or intellectual property rights are claimed.
               </p>
             </div>
 
@@ -700,8 +652,7 @@ export default function HomePage() {
               <span className="text-xs font-mono-code text-[#D8FF36]">03.</span>
               <h3 className="font-serif-luxury text-xl font-bold text-white">Non-Custodial Settlement Rails (Demo)</h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                Grant simulations flow through PayPal Developer Sandbox test endpoints. Transactions generate simulated
-                test receipts and impact certificates for demonstration purposes.
+                Grant simulations flow directly through PayPal Developer Sandbox test endpoints. Transactions generate PayPal sandbox order and capture IDs for testing, with zero platform custody.
               </p>
             </div>
 
@@ -709,93 +660,9 @@ export default function HomePage() {
               <span className="text-xs font-mono-code text-[#D8FF36]">04.</span>
               <h3 className="font-serif-luxury text-xl font-bold text-white">Anti-Spam & Sybil Resistance (Planned)</h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                Basic input filtering is active in this prototype, with comprehensive GitHub commit checks and automated
-                Sybil resistance planned for production deployment.
+                Basic input filtering is active in this prototype. Automated GitHub author verification, duplicate submission checks, and advanced Sybil resistance are planned for future releases.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Creator Wordmark with Optical Mirror Reflection & Signature Font */}
-      <section id="creator" className="pt-24 pb-20 bg-[#0A0C11] overflow-hidden relative border-b border-white/[0.06]">
-        <div className="gemini-rotating-blob top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-35" />
-
-        <div className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center text-center relative z-10 scroll-reveal">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-[11px] font-mono-code text-[#D8FF36] mb-4">
-            <span>Built with Passion • Lead Architect</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-2xl bg-[#0D0F15] border border-white/20 flex items-center justify-center text-[#D8FF36] font-serif-luxury font-black text-xl shadow-lg">
-              A
-            </div>
-            <div className="flex items-baseline">
-              <span className="font-serif-luxury text-5xl sm:text-6xl font-black tracking-tight text-white">
-                ANSH
-              </span>
-              <span className="h-3 w-3 rounded-full bg-[#EA4335] ml-1" />
-            </div>
-          </div>
-
-          <p className="font-signature text-3xl text-[#D8FF36] mt-3 select-none">
-            Ansh Yadav ~ Systems & Full-Stack
-          </p>
-
-          {/* Optical Mirror Floor Reflection */}
-          <div
-            aria-hidden="true"
-            className="select-none pointer-events-none -scale-y-100 opacity-20 blur-[0.7px] mt-1"
-            style={{
-              maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 65%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 65%)',
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-[#0D0F15] border border-white/20 flex items-center justify-center text-[#D8FF36] font-serif-luxury font-black text-xl">
-                A
-              </div>
-              <div className="flex items-baseline">
-                <span className="font-serif-luxury text-5xl sm:text-6xl font-black tracking-tight text-white">
-                  ANSH
-                </span>
-                <span className="h-3 w-3 rounded-full bg-[#EA4335] ml-1" />
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-8 text-xs text-white/50 max-w-lg leading-relaxed">
-            Designed and engineered by Ansh Yadav (<span className="text-[#D8FF36]">@anshydv3653-git</span>) for the PayPal AI Hackathon 2026. A student prototype exploring AI-assisted grant diligence and developer milestone funding.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-            <a
-              href="https://github.com/anshydv3653-git"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition"
-            >
-              <GithubIcon className="h-3.5 w-3.5" />
-              <span>GitHub Profile</span>
-            </a>
-            <a
-              href="https://twitter.com/Build_With_ansh"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition"
-            >
-              <TwitterIcon className="h-3.5 w-3.5" />
-              <span>@Build_With_ansh</span>
-            </a>
-            <a
-              href="https://instagram.com/_build_with_ansh"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition"
-            >
-              <InstagramIcon className="h-3.5 w-3.5" />
-              <span>Instagram</span>
-            </a>
           </div>
         </div>
       </section>
@@ -811,7 +678,9 @@ export default function HomePage() {
               <p className="text-xs leading-relaxed text-white/50">
                 Student micro-grant prototype powered by Gemini and Groq AI with PayPal Sandbox simulation.
               </p>
-              <p className="text-[11px] font-mono-code text-white/40">© 2026 SparkVenture Protocol (Hackathon Prototype).</p>
+              <p className="text-[11px] font-mono-code text-white/40">
+                © 2026 SparkVenture AI. Built by Ansh Yadav for the PayPal AI Hackathon 2026.
+              </p>
             </div>
 
             <div className="space-y-2.5 text-xs font-semibold">
@@ -832,7 +701,7 @@ export default function HomePage() {
 
             <div className="space-y-3 text-xs">
               <h4 className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#D8FF36]">
-                24/7 Global Support
+                Contact
               </h4>
 
               <div className="space-y-2">
@@ -1005,11 +874,14 @@ export default function HomePage() {
             >
               Simulate ${backingAmount} Sandbox Grant & Issue Certificate
             </button>
+            <p className="text-[10px] text-white/40 text-center">
+              Sandbox mode, no real money transferred
+            </p>
           </div>
         </div>
       )}
 
-      {/* Modal 3: Cryptographic Certificate of Impact */}
+      {/* Modal 3: Certificate of Impact */}
       {isCertificateOpen && certData && selectedProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
           <div className="relative w-full max-w-lg bg-[#0F121A] rounded-3xl border border-white/20 shadow-2xl p-8 space-y-6 text-center">
@@ -1042,13 +914,13 @@ export default function HomePage() {
 
               <div className="pt-3 border-t border-white/10 flex justify-between items-end text-left">
                 <div>
-                  <p className="text-[9px] font-mono-code text-white/40 uppercase">Transaction Hash</p>
+                  <p className="text-[9px] font-mono-code text-white/40 uppercase">PayPal Sandbox Order ID (Simulated)</p>
                   <p className="text-[10px] font-mono-code text-[#D8FF36]">{certData.txHash.slice(0, 16)}...</p>
                   <p className="text-[9px] font-mono-code text-white/40 mt-1">Date: {certData.date}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-signature text-2xl text-[#D8FF36]">Ansh Yadav</p>
-                  <p className="text-[9px] font-mono-code text-white/50">Founder, SparkVenture</p>
+                  <p className="text-[9px] font-mono-code text-white/50">Founder, SparkVenture AI</p>
                 </div>
               </div>
             </div>

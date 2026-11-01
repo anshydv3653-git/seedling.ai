@@ -1,98 +1,92 @@
-# ⚡ SparkVenture AI (Seedling AI)
-> **Autonomous Student Capital Infrastructure** — Pairing student builders with automated Google Gemini 2.5 code diligence and verified PayPal Sandbox micro-grant disbursements.
+# SparkVenture AI
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Google Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-orange?logo=google)](https://ai.google.dev/)
-[![PayPal](https://img.shields.io/badge/PayPal-Sandbox%20SDK-00457C?logo=paypal)](https://developer.paypal.com/)
+Autonomous student capital prototype pairing open-source repositories with AI-assisted code diligence and simulated PayPal Sandbox micro-grant disbursements.
 
----
+[Live Demo](https://sparkventure-ai.vercel.app) • [GitHub Repository](https://github.com/anshydv3653-git/seedling.ai)
 
-## 🎯 Project Overview
-Student innovators and bedroom hackers frequently build high-potential open-source prototypes but lack access to early seed capital for basic infrastructure (domains, edge servers, API keys). Traditional venture capital ignores grants under $5,000 due to overhead.
-
-**SparkVenture AI** solves this through:
-1. **Autonomous Code Diligence:** Leverages **Google Gemini 2.5 Flash** to conduct rigorous AST-level codebase audits directly from public GitHub repositories.
-2. **Anti-Spam & Sybil Resistance:** Blocks dummy repositories, duplicate submissions, and nonsensical text through strict heuristic filtering.
-3. **Sandbox Micro-Grant Rail:** Seamless disbursement of $25–$500 micro-grants directly via PayPal Sandbox payments without equity dilution.
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Google Gemini](https://img.shields.io/badge/Gemini-3.8--Flash-orange?style=flat&logo=google)](https://ai.google.dev/)
+[![Groq Fallback](https://img.shields.io/badge/Groq-Fallback-green?style=flat)](https://groq.com/)
+[![PayPal Sandbox](https://img.shields.io/badge/PayPal-Sandbox-003087?style=flat&logo=paypal)](https://developer.paypal.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat&logo=supabase)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 🛠️ Tech Stack
-- **Framework:** Next.js 16 (App Router), React 19
-- **Styling:** Tailwind CSS, Custom Ambient Moving Blob Glassmorphism
-- **AI Core:** Google Gemini 2.5 Flash API (`@google/genai`)
-- **Payments:** PayPal Sandbox Orders & Capture API
-- **Database:** Supabase (PostgreSQL)
-- **Deployment:** Vercel Edge Network
+> **Hackathon Note:** Built for the PayPal Hackathon 2026.  
+> 📺 **Demo Video:** [Watch Demo Video](ADD_LINK_HERE)
 
 ---
 
-## 🚀 Getting Started Locally
+## Problem & Solution
+
+### The Problem
+Student builders and early open-source developers often need small amounts of non-dilutive capital ($25–$500) to cover basic infrastructure costs like domain names, cloud hosting, and database services. Traditional venture capital and formal grants involve heavy paperwork, equity dilution, and review committees that are impractical for early-stage prototypes.
+
+### The Solution
+SparkVenture AI explores a lightweight alternative:
+1. Student repositories are showcased with key project information and README summaries.
+2. An interactive AI diligence agent reviews repository metadata and answers questions about architecture and project scope.
+3. Backers can test milestone micro-grant funding directly using PayPal Developer Sandbox rails without transferring real funds.
+
+---
+
+## How It Works
+
+1. **Browse Showcase Repositories:** Select a project card to view repository tags, milestone goals, and builder details.
+2. **Review via AI Diligence Agent:** Open the AI chat dialog to query the project's codebase structure, framework choices, and grant allocation scope.
+3. **Simulate a Micro-Grant:** Select a funding tier ($25, $50, or $100) and complete the simulated transaction via PayPal Sandbox.
+4. **Issue Impact Certificate:** Generate a demo Certificate of Micro-Capital Impact containing simulated transaction metadata, date, and project title.
+
+---
+
+## Features
+
+- **Dual-Model AI Diligence:** AI chat engine powered primarily by Google Gemini (`gemini-3.8-flash` with `gemini-flash-latest` fallback), backed by an automatic failover to Groq (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`) for reliable query handling.
+- **README & Metadata Review:** The AI diligence agent inspects repository descriptions, dependency manifests, and README files to contextualize responses.
+- **PayPal Sandbox Checkout:** Integrated PayPal sandbox flow simulating order creation and grant settlement without real money.
+- **Demo Impact Certificates:** In-browser printable impact certificate modal displaying transaction hashes, recipient details, and date.
+- **Database Row Level Security (RLS):** Supabase PostgreSQL tables configured with strict RLS policies to prevent client-side score modification and ledger tampering.
+- **Telemetric Sonar Radar:** Interactive HTML5 canvas component visualizing scan sweeps and simulated registry telemetry.
+
+---
+
+## Screenshots
+
+![Home](docs/home.png)
+![AI Chat](docs/chat.png)
+![PayPal Sandbox](docs/paypal.png)
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Framework** | Next.js 16 (App Router) |
+| **Frontend Library** | React 19 |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS |
+| **Primary AI Engine** | Google Gemini (`gemini-3.8-flash`, fallback: `gemini-flash-latest`) |
+| **Failover AI Engine**| Groq (`openai/gpt-oss-120b`, fallback: `openai/gpt-oss-20b`) |
+| **Payment Rail** | PayPal Sandbox (Orders & Capture API) |
+| **Database** | Supabase (PostgreSQL with Row Level Security) |
+| **Deployment** | Vercel |
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- Node.js (v18.18.0 or later)
-- npm or pnpm
-- Google AI Studio API Key
-- PayPal Developer Sandbox Client Credentials
+- Node.js `18.18.0` or `>= 20.0.0`
+- npm, pnpm, or yarn
+- A Supabase account and project
+- Google AI Studio API key
+- Groq Cloud API key (for failover support)
+- PayPal Developer account (for Sandbox Client ID & Secret)
 
-### 1. Clone the repository
-\`\`\`bash
-git clone https://github.com/anshydv3653-git/Seedling-AI.git
-cd Seedling-AI
-\`\`\`
-
-### 2. Install dependencies
-\`\`\`bash
-npm install
-\`\`\`
-
-### 3. Setup Environment Variables
-Create a `.env.local` file in the root directory and add the following keys:
-
-\`\`\`env
-# Gemini AI
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# PayPal Sandbox
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_sandbox_client_id
-PAYPAL_CLIENT_SECRET=your_paypal_sandbox_client_secret
-
-# Supabase (Optional for full DB persistence)
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-\`\`\`
-
-### 4. Run Development Server
-\`\`\`bash
-npm run dev
-\`\`\`
-Open [http://localhost:3000](http://localhost:3000) with your browser to explore the platform.
-
-### 5. Build for Production
-\`\`\`bash
-npm run build
-\`\`\`
-
----
-
-## 🔒 Strict Security & Due Diligence Rules
-SparkVenture integrates automated safeguards in `app/api/projects/evaluate/route.ts`:
-- **Live GitHub Verification:** Real-time ping via GitHub REST API. Returns 404 block for non-existent repositories.
-- **Anti-Gibberish Filter:** Rejects consecutive repeating characters and vowel-sparse string spam.
-- **Duplicate Protection:** Disallows duplicate repository URLs or matching project titles.
-
----
-
-## 📜 License
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👨‍💻 Author & Support
-- **Founder & Developer:** Ansh Yadav
-- **Support Email:** sparkai.automation@gmail.com
-- **Instagram:** [@_build_with_ansh](https://instagram.com/_build_with_ansh)
-- **Twitter / X:** [@Build_With_ansh](https://twitter.com/Build_With_ansh)
-- **GitHub:** [@anshydv3653-git](https://github.com/anshydv3653-git)
+### 1. Clone the Repository
+```bash
+git clone [https://github.com/anshydv3653-git/seedling.ai.git](https://github.com/anshydv3653-git/seedling.ai.git)
+cd seedling.ai
