@@ -1,61 +1,72 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-
-const apiKey = process.env.GEMINI_API_KEY || '';
 
 export async function POST(req: Request) {
-  let projectTitle = 'project';
-
   try {
     const body = await req.json();
     const { title, githubUrl, description, userQuery } = body;
-    if (title) projectTitle = title;
 
+    // 1. Live Chat in Diligence Modal
     if (userQuery) {
+      const apiKey = process.env.GEMINI_API_KEY?.trim();
+
       if (!apiKey) {
         return NextResponse.json({
-          reply: `⚠️ Error: GEMINI_API_KEY Vercel Environment Variables me missing hai. Vercel Settings me key add karke Redeploy karein.`,
+          reply: '⚠️ Error: GEMINI_API_KEY environment variable missing hai. Vercel Settings me key add karke Redeploy karein.',
         });
       }
 
-      const ai = new GoogleGenAI({ apiKey });
-      const prompt = `
+      const systemPrompt = `
 You are the Google Gemini Diligence Agent for SparkVenture (SVC).
-Auditing Project: "${title}"
-GitHub Repo: ${githubUrl || 'N/A'}
-Description: "${description || 'Student software prototype'}".
+Project: "${title || 'Student Project'}"
+GitHub: ${githubUrl || 'N/A'}
+Description: "${description || 'Open source prototype'}"
 
-The user asks: "${userQuery}"
+User asked: "${userQuery}"
 
-Provide a crisp, direct, and authentic technical evaluation (3 to 5 sentences).
-Address their exact query directly (in natural English or Hinglish).
-Critique architecture scalability, grant allocation justification, or code structure.
-Never repeat boilerplate phrases.
+Instructions:
+- Provide a sharp, direct, technical assessment (2-4 sentences).
+- If the user says hello or casual greetings, greet back warmly and mention you are analyzing their repo.
+- If they ask technical questions, critique scalability, architecture, or grant justification.
+- Support English and Hinglish naturally. Never give repetitive boilerplate answers.
 `;
 
-      let replyText = '';
+      // Direct Google Gemini REST API Call (StudyHub 2.0 Model)
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-      // Primary: Try gemini-2.5-flash, Fallback: Try gemini-1.5-flash
-      try {
-        const res = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      const geminiRes = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: systemPrompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 300,
+          },
+        }),
+      });
+
+      const data = await geminiRes.json();
+
+      if (!geminiRes.ok) {
+        const errorMsg = data?.error?.message || 'Google API error';
+        console.error('Google API Error:', data);
+        return NextResponse.json({
+          reply: `⚠️ Google API Error (${geminiRes.status}): ${errorMsg}`,
         });
-        replyText = res.text || '';
-      } catch {
-        const fallbackRes = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        });
-        replyText = fallbackRes.text || '';
       }
 
+      const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
       return NextResponse.json({
-        reply: replyText || `Verified architecture for ${title}. Production stack looks sound and well-scoped.`,
+        reply: generatedText || `Verified architecture for ${title}. Production stack looks sound and well-scoped.`,
       });
     }
 
-    // Project Ingestion Check
+    // 2. Project Evaluation Default Response
     return NextResponse.json({
       success: true,
       audit: {
@@ -66,9 +77,9 @@ Never repeat boilerplate phrases.
       repoDetails: { language: 'FullStack', stars: 10 },
     });
   } catch (error: any) {
-    console.error('Gemini API Route Error:', error);
+    console.error('Server Internal Error:', error);
     return NextResponse.json({
-      reply: `⚠️ Gemini API Error: ${error?.message || 'Execution error'}. Check Vercel logs or API key permissions.`,
+      reply: `⚠️ Server Error: ${error?.message || 'Internal error processing diligence'}.`,
     });
   }
 }
