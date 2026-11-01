@@ -4,20 +4,9 @@ export const maxDuration = 30;
 
 const clean = (v?: string) => v?.replace(/['"\s]/g, '') || '';
 
-async function getReadme(githubUrl?: string) {
-  try {
-    const m = githubUrl?.match(/github\.com\/([^/]+)\/([^/#?]+)/);
-    if (!m) return '';
-    const repo = m[2].replace(/\.git$/, '');
-    const res = await fetch(`https://api.github.com/repos/${m[1]}/${repo}/readme`, {
-      headers: { Accept: 'application/vnd.github.raw', 'User-Agent': 'sparkventure' },
-    });
-    if (!res.ok) return '';
-    return (await res.text()).slice(0, 4000);
-  } catch {
-    return '';
-  }
-}
+// Models: pehla fail ho to agla try hoga
+const GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
+const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-flash-latest'];
 
 async function fetchWithTimeout(url: string, init: RequestInit, ms: number) {
   const controller = new AbortController();
@@ -27,6 +16,90 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number) {
   } finally {
     clearTimeout(t);
   }
+}
+
+async function getReadme(githubUrl?: string) {
+  try {
+    const m = githubUrl?.match(/github\.com\/([^/]+)\/([^/#?]+)/);
+    if (!m) return '';
+    const repo = m[2].replace(/\.git$/, '');
+    const res = await fetchWithTimeout(
+      `https://api.github.com/repos/${m[1]}/${repo}/readme`,
+      { headers: { Accept: 'application/vnd.github.raw', 'User-Agent': 'sparkventure' } },
+      5000
+    );
+    if (!res.ok) return '';
+    return (await res.text()).slice(0, 4000);
+  } catch {
+    return '';
+  }
+}
+
+async function askGroq(key: string, prompt: string): Promise<string | null> {
+  for (const model of GROQ_MODELS) {
+    try {
+      const res = await fetchWithTimeout(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.5,
+            max_tokens: 1500,
+          }),
+        },
+        12000
+      );
+      if (!res.ok) {
+        console.error(`Groq ${model} failed:`, res.status, (await res.text()).slice(0, 300));
+        continue;
+      }
+      const data = await res.json();
+      const text = data?.choices?.[0]?.message?.content?.trim();
+      if (text) return text;
+      console.error(`Groq ${model} returned empty text`);
+    } catch (e) {
+      console.error(`Groq ${model} error:`, e);
+    }
+  }
+  return null;
+}
+
+async function askGemini(key: string, prompt: string): Promise<string | null> {
+  for (const model of GEMINI_MODELS) {
+    try {
+      const res = await fetchWithTimeout(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.5, maxOutputTokens: 2000 },
+          }),
+        },
+        15000
+      );
+      if (!res.ok) {
+        console.error(`Gemini ${model} failed:`, res.status, (await res.text()).slice(0, 300));
+        continue;
+      }
+      const data = await res.json();
+      const parts: any[] = data?.candidates?.[0]?.content?.parts || [];
+      const text = parts
+        .filter((p) => p?.text && !p?.thought)
+        .map((p) => p.text)
+        .join('')
+        .trim();
+      if (text) return text;
+      console.error(`Gemini ${model} returned empty text`);
+    } catch (e) {
+      console.error(`Gemini ${model} error:`, e);
+    }
+  }
+  return null;
 }
 
 export async function POST(req: Request) {
@@ -60,65 +133,13 @@ Rules:
 - If you don't know something from the info above, say so. Do not invent details.
 - Reply in the same language as the user (English or Hinglish).`;
 
-    // 1) Groq
-    if (groqKey) {
-      for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']) {
-        try {
-          const res = await fetchWithTimeout(
-            'https://api.groq.com/openai/v1/chat/completions',
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${groqKey}` },
-              body: JSON.stringify({
-                model,
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.5,
-                max_tokens: 400,
-              }),
-            },
-            8000
-          );
-          if (!res.ok) {
-            console.error(`Groq ${model} failed:`, res.status, await res.text());
-            continue;
-          }
-          const data = await res.json();
-          const text = data?.choices?.[0]?.message?.content?.trim();
-          if (text) return NextResponse.json({ reply: text });
-        } catch (e) {
-          console.error(`Groq ${model} error:`, e);
-        }
-      }
-    }
+    let reply: string | null = null;
 
-    // 2) Gemini
-    if (geminiKey) {
-      try {
-        const res = await fetchWithTimeout(
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.5, maxOutputTokens: 400 },
-            }),
-          },
-          10000
-        );
-        if (!res.ok) {
-          console.error('Gemini failed:', res.status, await res.text());
-        } else {
-          const data = await res.json();
-          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-          if (text) return NextResponse.json({ reply: text });
-        }
-      } catch (e) {
-        console.error('Gemini error:', e);
-      }
-    }
+    if (groqKey) reply = await askGroq(groqKey, prompt);
+    if (!reply && geminiKey) reply = await askGemini(geminiKey, prompt);
 
-    // 3) Honest failure
+    if (reply) return NextResponse.json({ reply });
+
     return NextResponse.json({
       reply: 'The AI agent is temporarily unavailable. Please try again in a moment.',
     });
