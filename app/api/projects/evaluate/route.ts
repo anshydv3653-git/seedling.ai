@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 const clean = (v?: string) => v?.replace(/['"\s]/g, '') || '';
 
-// Models: pehla fail ho to agla try hoga
+// Pehla model fail ho to agla try hoga
+const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-flash-latest'];
 const GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
-const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-flash-latest'];
 
 async function fetchWithTimeout(url: string, init: RequestInit, ms: number) {
   const controller = new AbortController();
@@ -26,7 +27,7 @@ async function getReadme(githubUrl?: string) {
     const res = await fetchWithTimeout(
       `https://api.github.com/repos/${m[1]}/${repo}/readme`,
       { headers: { Accept: 'application/vnd.github.raw', 'User-Agent': 'sparkventure' } },
-      5000
+      3000
     );
     if (!res.ok) return '';
     return (await res.text()).slice(0, 4000);
@@ -35,40 +36,10 @@ async function getReadme(githubUrl?: string) {
   }
 }
 
-async function askGroq(key: string, prompt: string): Promise<string | null> {
-  for (const model of GROQ_MODELS) {
-    try {
-      const res = await fetchWithTimeout(
-        'https://api.groq.com/openai/v1/chat/completions',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.5,
-            max_tokens: 1500,
-          }),
-        },
-        12000
-      );
-      if (!res.ok) {
-        console.error(`Groq ${model} failed:`, res.status, (await res.text()).slice(0, 300));
-        continue;
-      }
-      const data = await res.json();
-      const text = data?.choices?.[0]?.message?.content?.trim();
-      if (text) return text;
-      console.error(`Groq ${model} returned empty text`);
-    } catch (e) {
-      console.error(`Groq ${model} error:`, e);
-    }
-  }
-  return null;
-}
-
-async function askGemini(key: string, prompt: string): Promise<string | null> {
+async function askGemini(key: string, prompt: string, deadline: number): Promise<string | null> {
   for (const model of GEMINI_MODELS) {
+    const remaining = deadline - Date.now();
+    if (remaining < 2000) break;
     try {
       const res = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -80,7 +51,7 @@ async function askGemini(key: string, prompt: string): Promise<string | null> {
             generationConfig: { temperature: 0.5, maxOutputTokens: 2000 },
           }),
         },
-        15000
+        Math.min(9000, remaining)
       );
       if (!res.ok) {
         console.error(`Gemini ${model} failed:`, res.status, (await res.text()).slice(0, 300));
@@ -102,7 +73,42 @@ async function askGemini(key: string, prompt: string): Promise<string | null> {
   return null;
 }
 
+async function askGroq(key: string, prompt: string, deadline: number): Promise<string | null> {
+  for (const model of GROQ_MODELS) {
+    const remaining = deadline - Date.now();
+    if (remaining < 2000) break;
+    try {
+      const res = await fetchWithTimeout(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.5,
+            max_tokens: 1500,
+          }),
+        },
+        Math.min(9000, remaining)
+      );
+      if (!res.ok) {
+        console.error(`Groq ${model} failed:`, res.status, (await res.text()).slice(0, 300));
+        continue;
+      }
+      const data = await res.json();
+      const text = data?.choices?.[0]?.message?.content?.trim();
+      if (text) return text;
+      console.error(`Groq ${model} returned empty text`);
+    } catch (e) {
+      console.error(`Groq ${model} error:`, e);
+    }
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
+  const start = Date.now();
   try {
     const { title, githubUrl, description, userQuery } = await req.json();
 
@@ -113,9 +119,9 @@ export async function POST(req: Request) {
       });
     }
 
-    const groqKey = clean(process.env.GROQ_API_KEY);
     const geminiKey = clean(process.env.GEMINI_API_KEY);
-    console.log('keys present:', { groq: !!groqKey, gemini: !!geminiKey });
+    const groqKey = clean(process.env.GROQ_API_KEY);
+    console.log('keys present:', { gemini: !!geminiKey, groq: !!groqKey });
 
     const readme = await getReadme(githubUrl);
 
@@ -135,8 +141,14 @@ Rules:
 
     let reply: string | null = null;
 
-    if (groqKey) reply = await askGroq(groqKey, prompt);
-    if (!reply && geminiKey) reply = await askGemini(geminiKey, prompt);
+    // 1) Main priority: Gemini (start se max 15 sec tak)
+    if (geminiKey) reply = await askGemini(geminiKey, prompt, start + 15000);
+
+    // 2) Fallback: Groq (sirf jab Gemini fail ho, start se max 26 sec tak)
+    if (!reply && groqKey) {
+      console.warn('Gemini failed, falling back to Groq');
+      reply = await askGroq(groqKey, prompt, start + 26000);
+    }
 
     if (reply) return NextResponse.json({ reply });
 
